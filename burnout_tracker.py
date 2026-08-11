@@ -25,3 +25,16 @@ def load_check_ins(filename=FILENAME):
 def save_checkin(check_in, filename=FILENAME):
     with open(filename, "w") as file:
             file.write(check_in.daily_check_in() + "\n")
+
+def calculate_risk_score(check_ins):
+    recent = check_ins[-7:] #Get the last 7 days of check-ins
+    total = 0
+    for check_in in recent:
+        total += check_in.mood + check_in.energy + check_in.workload
+    average = total / len(recent)
+    score = int((average / 15) * 100)
+    if score < 0:
+        score = 0
+    elif score > 100:
+        score = 100
+    return score
