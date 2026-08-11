@@ -21,3 +21,7 @@ def load_check_ins(filename=FILENAME):
             date, mood, energy, workload = line.split(",")
             check_ins.append(Check_In(date, int(mood), int(energy), int(workload)))
     return check_ins
+
+def save_checkin(check_in, filename=FILENAME):
+    with open(filename, "w") as file:
+            file.write(check_in.daily_check_in() + "\n")
