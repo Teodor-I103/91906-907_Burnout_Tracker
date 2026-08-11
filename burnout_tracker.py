@@ -13,3 +13,11 @@ class Check_In:
 
     def daily_check_in(self):
         return f"{self.date},{self.workload},{self.energy},{self.mood}"
+
+def load_check_ins(filename=FILENAME):
+    check_ins = []
+    with open(filename, "r") as file:
+        for line in file:
+            date, mood, energy, workload = line.split(",")
+            check_ins.append(Check_In(date, int(mood), int(energy), int(workload)))
+    return check_ins
