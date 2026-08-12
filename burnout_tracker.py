@@ -38,3 +38,24 @@ def calculate_risk_score(check_ins):
     elif score > 100:
         score = 100
     return score
+
+checkins = load_check_ins()
+
+root = tk.Tk()
+root.title("Flare")
+root.geometry("300x320")
+
+tk.Label(root, text="Mood (1-5):").pack(pady=(15, 0))
+mood_entry = tk.Entry(root, width=10)
+mood_entry.pack()
+
+tk.Label(root, text="Energy (1-5):").pack(pady=(10, 0))
+energy_entry = tk.Entry(root, width=10)
+energy_entry.pack()
+
+tk.Label(root, text="Workload (1-5):").pack(pady=(10, 0))
+workload_entry = tk.Entry(root, width=10)
+workload_entry.pack()
+
+score_label = tk.Label(root, text="", font=("Arial", 12))
+score_label.pack(pady=15)
