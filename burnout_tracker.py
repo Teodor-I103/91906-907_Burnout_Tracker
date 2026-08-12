@@ -15,13 +15,15 @@ class Check_In:
         return f"{self.date},{self.workload},{self.energy},{self.mood}"
 
 def load_check_ins(filename=FILENAME):
-    check_ins = []
-    with open(filename, "r") as file:
-        for line in file:
-            date, mood, energy, workload = line.split(",")
-            check_ins.append(Check_In(date, int(mood), int(energy), int(workload)))
-    return check_ins
-
+    try:
+        check_ins = []
+        with open(filename, "r") as file:
+            for line in file:
+                date, mood, energy, workload = line.split(",")
+                check_ins.append(Check_In(date, int(mood), int(energy), int(workload)))
+        return check_ins
+    except FileNotFoundError:
+        return check_ins
 def save_checkin(check_in, filename=FILENAME):
     with open(filename, "w") as file:
             file.write(check_in.daily_check_in() + "\n")
