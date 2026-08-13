@@ -73,3 +73,10 @@ workload_entry.pack()
 
 score_label = tk.Label(root, text="", font=("Arial", 12))
 score_label.pack(pady=15)
+
+def collect_entries():
+    mood = get_valid_rating(mood_entry, "Mood")
+    energy = get_valid_rating(energy_entry, "Energy")
+    workload = get_valid_rating(workload_entry, "Workload")
+
+root.mainloop()
