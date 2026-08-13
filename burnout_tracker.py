@@ -43,6 +43,18 @@ def calculate_risk_score(check_ins):
 
 checkins = load_check_ins()
 
+def get_valid_rating(entry, field_name):
+    value = entry.get()
+    try:
+        value = int(value)
+    except ValueError:
+        messagebox.showerror("Invalid input", f"{field_name} must be a whole number.")
+        return None
+    if value < 0 or value > 5:
+        messagebox.showerror("Invalid input", f"{field_name} must be between 0 and 5.")
+        return None
+    return value
+ 
 root = tk.Tk()
 root.title("Flare")
 root.geometry("300x320")
