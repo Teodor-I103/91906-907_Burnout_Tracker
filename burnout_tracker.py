@@ -127,9 +127,23 @@ def open_history():
         for check_in in checkins:
             text = f"{check_in.date}: {risk_level_for(check_in)}"
             tk.Label(history_window, text=text, anchor="w").pack(fill="x", padx=20)
-            
+
+def open_notice():
+    notice_window = tk.Toplevel()
+    notice_window.title("Flare — Notice")
+    notice_window.geometry("250x150")
+    score = calculate_risk_score(checkins)
+    level = risk_level_from_score(score)
+    
+    if level == "high":
+        message = "Your check-ins show a high burnout risk. Consider taking a break."
+    else:
+        message = "Your burnout risk is not currently high. Keep checking in daily."
+    
+    tk.Label(notice_window, text=message, wraplength=200, justify="center").pack(pady=20, padx=10)
 
 tk.Button(root, text="View History", command=open_history).pack(pady=5)
+tk.Button(root, text="View Notice", command=open_notice).pack(pady=5)
 
 refresh_score_label()
 
