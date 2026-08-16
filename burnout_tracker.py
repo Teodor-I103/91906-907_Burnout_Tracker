@@ -93,6 +93,7 @@ def collect_entries():
     today = datetime.date.today().isoformat()
     new_check_in = Check_In(today, mood, energy, workload)
     checkins.append(new_check_in)
+    save_checkin(new_check_in)
     messagebox.showinfo("Saved", "Your check-in has been saved.")
 
 tk.Button(root, text="Submit check-in", command=collect_entries).pack(pady=5)
