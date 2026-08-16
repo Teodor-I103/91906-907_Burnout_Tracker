@@ -35,7 +35,7 @@ def calculate_risk_score(check_ins):
     recent = check_ins[-7:] #Get the last 7 days of check-ins
     total = 0
     for check_in in recent:
-        total += check_in.mood + check_in.energy + check_in.workload
+        total += (5 - check_in.mood) + (5 - check_in.energy) + check_in.workload
     average = total / len(recent)
     score = int((average / 15) * 100)
     if score < 0:
@@ -53,7 +53,7 @@ def risk_level_from_score(score):
         return "low"
 
 def risk_level_for(check_in):
-    average = (check_in.mood + check_in.energy + check_in.workload) / 3
+    average = (check_in.mood + check_in.energy + (5 - check_in.workload)) / 3
     if average <= 2:
         return "high"
     elif average <= 3.5:
