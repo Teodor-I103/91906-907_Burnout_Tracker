@@ -42,6 +42,15 @@ def calculate_risk_score(check_ins):
         score = 100
     return score
 
+def risk_level_for(check_in):
+    average = (check_in.mood + check_in.energy + check_in.workload) / 3
+    if average <= 2:
+        return "high"
+    elif average <= 3.5:
+        return "moderate"
+    else:
+        return "low"
+
 def get_valid_rating(entry, field_name):
     value = entry.get()
     try:
@@ -95,6 +104,13 @@ def open_history():
 
     tk.Label(history_window, text="Check-in History", font=("Arial", 14)).pack(pady=10)
 
+    if not checkins:
+        tk.Label(history_window, text="No check-ins yet.").pack(pady=10)
+    else:
+        for check_in in checkins:
+            text = f"{check_in.date}: {risk_level_for(check_in)}"
+            tk.Label(history_window, text=text, anchor="w").pack(fill="x", padx=20)
+            
 
 tk.Button(root, text="View History", command=open_history).pack(pady=5)
 
