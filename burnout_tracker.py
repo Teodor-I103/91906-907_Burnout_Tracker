@@ -30,6 +30,8 @@ def save_checkin(check_in, filename=FILENAME):
             file.write(check_in.daily_check_in() + "\n")
 
 def calculate_risk_score(check_ins):
+    if not check_ins:
+        return 0
     recent = check_ins[-7:] #Get the last 7 days of check-ins
     total = 0
     for check_in in recent:
@@ -92,6 +94,11 @@ workload_entry.pack()
 score_label = tk.Label(root, text="", font=("Arial", 12))
 score_label.pack(pady=15)
 
+def refresh_score_label():
+    score = calculate_risk_score(checkins)
+    level = risk_level_from_score(score)
+    score_label.config(text=f"Burnout risk: {score} - {level}")
+
 def collect_entries():
     mood = get_valid_rating(mood_entry, "Mood")
     energy = get_valid_rating(energy_entry, "Energy")
@@ -102,6 +109,7 @@ def collect_entries():
     new_check_in = Check_In(today, mood, energy, workload)
     checkins.append(new_check_in)
     save_checkin(new_check_in)
+    refresh_score_label()
     messagebox.showinfo("Saved", "Your check-in has been saved.")
 
 tk.Button(root, text="Submit check-in", command=collect_entries).pack(pady=5)
@@ -122,5 +130,7 @@ def open_history():
             
 
 tk.Button(root, text="View History", command=open_history).pack(pady=5)
+
+refresh_score_label()
 
 root.mainloop()
