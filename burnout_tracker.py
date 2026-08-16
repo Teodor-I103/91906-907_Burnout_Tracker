@@ -42,6 +42,14 @@ def calculate_risk_score(check_ins):
         score = 100
     return score
 
+def risk_level_from_score(score):
+    if score >= 65:
+        return "high"
+    elif score >= 35:
+        return "moderate"
+    else:
+        return "low"
+
 def risk_level_for(check_in):
     average = (check_in.mood + check_in.energy + check_in.workload) / 3
     if average <= 2:
