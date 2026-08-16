@@ -24,6 +24,7 @@ def load_check_ins(filename=FILENAME):
         return check_ins
     except FileNotFoundError:
         return check_ins
+    
 def save_checkin(check_in, filename=FILENAME):
     with open(filename, "w") as file:
             file.write(check_in.daily_check_in() + "\n")
@@ -41,8 +42,6 @@ def calculate_risk_score(check_ins):
         score = 100
     return score
 
-checkins = load_check_ins()
-
 def get_valid_rating(entry, field_name):
     value = entry.get()
     try:
@@ -54,6 +53,8 @@ def get_valid_rating(entry, field_name):
         messagebox.showerror("Invalid input", f"{field_name} must be between 0 and 5.")
         return None
     return value
+
+checkins = load_check_ins()
  
 root = tk.Tk()
 root.title("Flare")
@@ -78,5 +79,13 @@ def collect_entries():
     mood = get_valid_rating(mood_entry, "Mood")
     energy = get_valid_rating(energy_entry, "Energy")
     workload = get_valid_rating(workload_entry, "Workload")
+    if mood is None or energy is None or workload is None:
+        return
+    today = datetime.date.today().isoformat()
+    print(today)
+    new_check_in = Check_In(today, mood, energy, workload)
+    checkins.append(new_check_in)
+    messagebox.showinfo("Saved", "Your check-in has been saved.")
+
 
 root.mainloop()
