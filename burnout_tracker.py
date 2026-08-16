@@ -26,7 +26,7 @@ def load_check_ins(filename=FILENAME):
         return check_ins
     
 def save_checkin(check_in, filename=FILENAME):
-    with open(filename, "w") as file:
+    with open(filename, "a") as file:
             file.write(check_in.daily_check_in() + "\n")
 
 def calculate_risk_score(check_ins):
