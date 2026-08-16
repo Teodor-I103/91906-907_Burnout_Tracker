@@ -82,10 +82,20 @@ def collect_entries():
     if mood is None or energy is None or workload is None:
         return
     today = datetime.date.today().isoformat()
-    print(today)
     new_check_in = Check_In(today, mood, energy, workload)
     checkins.append(new_check_in)
     messagebox.showinfo("Saved", "Your check-in has been saved.")
 
+tk.Button(root, text="Submit check-in", command=collect_entries).pack(pady=5)
+
+def open_history():
+    history_window = tk.Toplevel(root)
+    history_window.title("Flare Check-in History")
+    history_window.geometry("250x250")
+
+    tk.Label(history_window, text="Check-in History", font=("Arial", 14)).pack(pady=10)
+
+
+tk.Button(root, text="View History", command=open_history).pack(pady=5)
 
 root.mainloop()
