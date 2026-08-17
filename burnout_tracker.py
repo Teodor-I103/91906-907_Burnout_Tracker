@@ -3,6 +3,17 @@ from tkinter import messagebox
 import datetime
 
 FILENAME = "check_ins.txt"
+UPPER_BOUNDARY = 5
+LOWER_BOUNDARY = 1
+MIN_SCORE = 0
+MAX_SCORE = 100
+HIGH_RISK_AVERAGE = 2
+HIGH_RISK_SCORE = 65
+MODERATE_RISK_SCORE = 35
+MODERATE_RISK_AVERAGE = 3.5
+WEEK = 7
+MAX_TOTAL_SCORE = 15
+FACTOR_COUNT = 3
 
 class Check_In:
     def __init__(self, date, mood, energy, workload):
@@ -32,31 +43,31 @@ def save_checkin(check_in, filename=FILENAME):
 def calculate_risk_score(check_ins):
     if not check_ins:
         return 0
-    recent = check_ins[-7:] #Get the last 7 days of check-ins
+    recent = check_ins[-WEEK:] #Get the last 7 days of check-ins
     total = 0
     for check_in in recent:
-        total += (5 - check_in.mood) + (5 - check_in.energy) + check_in.workload
+        total += (UPPER_BOUNDARY - check_in.mood) + (UPPER_BOUNDARY - check_in.energy) + check_in.workload
     average = total / len(recent)
-    score = int((average / 15) * 100)
-    if score < 0:
-        score = 0
-    elif score > 100:
-        score = 100
+    score = int((average / MAX_TOTAL_SCORE) * 100)
+    if score < MIN_SCORE:
+        score = MIN_SCORE
+    elif score > MAX_SCORE:
+        score = MAX_SCORE
     return score
 
 def risk_level_from_score(score):
-    if score >= 65:
+    if score >= HIGH_RISK_SCORE:
         return "high"
-    elif score >= 35:
+    elif score >= MODERATE_RISK_SCORE:
         return "moderate"
     else:
         return "low"
 
 def risk_level_for(check_in):
-    average = (check_in.mood + check_in.energy + (5 - check_in.workload)) / 3
-    if average <= 2:
+    average = (check_in.mood + check_in.energy + (UPPER_BOUNDARY - check_in.workload)) / FACTOR_COUNT
+    if average <= HIGH_RISK_AVERAGE:
         return "high"
-    elif average <= 3.5:
+    elif average <= MODERATE_RISK_AVERAGE:
         return "moderate"
     else:
         return "low"
@@ -68,8 +79,8 @@ def get_valid_rating(entry, field_name):
     except ValueError:
         messagebox.showerror("Invalid input", f"{field_name} must be a whole number.")
         return None
-    if value < 0 or value > 5:
-        messagebox.showerror("Invalid input", f"{field_name} must be between 0 and 5.")
+    if value < LOWER_BOUNDARY or value > UPPER_BOUNDARY:
+        messagebox.showerror("Invalid input", f"{field_name} must be between {LOWER_BOUNDARY} and {UPPER_BOUNDARY}.")
         return None
     return value
 
@@ -130,11 +141,11 @@ def open_history():
 
 def open_notice():
     notice_window = tk.Toplevel()
-    notice_window.title("Flare — Notice")
+    notice_window.title("Flare - Notice")
     notice_window.geometry("250x150")
     score = calculate_risk_score(checkins)
     level = risk_level_from_score(score)
-    
+
     if level == "high":
         message = "Your check-ins show a high burnout risk. Consider taking a break."
     else:
