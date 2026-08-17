@@ -20,7 +20,7 @@ class Check_In:
         self.workload = workload
 
     def daily_check_in(self):
-        return f"{self.date},{self.workload},{self.energy},{self.mood}"
+        return f"{self.date},{self.mood},{self.energy},{self.workload}"
 
 def load_check_ins(filename=FILENAME):
     try:
