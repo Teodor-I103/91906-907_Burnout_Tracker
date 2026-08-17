@@ -11,7 +11,7 @@ MAX_SCORE = 100 #Highest possible burnout risk score
 HIGH_RISK_SCORE = 65 #Score threshold for high burnout risk
 MODERATE_RISK_SCORE = 35 #Score threshold for moderate burnout risk
 WEEK = 7 #Number of day used to calculate the average burnout risk score
-MAX_TOTAL_SCORE = 15 #Highest possible total score from a single check-in
+MAX_TOTAL_SCORE = 13 #Highest possible total score from a single check-in
 
 #Represents a single check-in, holding the data and ratings.
 class Check_In:
