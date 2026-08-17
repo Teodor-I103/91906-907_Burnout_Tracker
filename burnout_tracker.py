@@ -81,7 +81,7 @@ def get_valid_rating(entry, field_name):
         return None
     return value
 
-checkins = load_check_ins()
+check_ins = load_check_ins()
  
 root = tk.Tk()
 root.title("Flare")
@@ -103,7 +103,7 @@ score_label = tk.Label(root, text="", font=("Arial", 12))
 score_label.pack(pady=15)
 
 def refresh_score_label():
-    score = calculate_risk_score(checkins)
+    score = calculate_risk_score(check_ins)
     level = risk_level_from_score(score)
     score_label.config(text=f"Burnout risk: {score} - {level}")
 
@@ -115,7 +115,7 @@ def collect_entries():
         return
     today = datetime.date.today().isoformat()
     new_check_in = Check_In(today, mood, energy, workload)
-    checkins.append(new_check_in)
+    check_ins.append(new_check_in)
     save_checkin(new_check_in)
     refresh_score_label()
     messagebox.showinfo("Saved", "Your check-in has been saved.")
@@ -129,10 +129,10 @@ def open_history():
 
     tk.Label(history_window, text="Check-in History", font=("Arial", 14)).pack(pady=10)
 
-    if not checkins:
+    if not check_ins:
         tk.Label(history_window, text="No check-ins yet.").pack(pady=10)
     else:
-        for check_in in checkins:
+        for check_in in check_ins:
             text = f"{check_in.date}: {risk_level_for(check_in)}"
             tk.Label(history_window, text=text, anchor="w").pack(fill="x", padx=20)
 
@@ -140,7 +140,7 @@ def open_notice():
     notice_window = tk.Toplevel()
     notice_window.title("Flare - Notice")
     notice_window.geometry("250x150")
-    score = calculate_risk_score(checkins)
+    score = calculate_risk_score(check_ins)
     level = risk_level_from_score(score)
 
     if level == "high":
