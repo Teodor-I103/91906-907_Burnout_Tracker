@@ -7,13 +7,10 @@ UPPER_BOUNDARY = 5
 LOWER_BOUNDARY = 1
 MIN_SCORE = 0
 MAX_SCORE = 100
-HIGH_RISK_AVERAGE = 2
 HIGH_RISK_SCORE = 65
 MODERATE_RISK_SCORE = 35
-MODERATE_RISK_AVERAGE = 3.5
 WEEK = 7
 MAX_TOTAL_SCORE = 15
-FACTOR_COUNT = 3
 
 class Check_In:
     def __init__(self, date, mood, energy, workload):
@@ -64,13 +61,13 @@ def risk_level_from_score(score):
         return "low"
 
 def risk_level_for(check_in):
-    average = (check_in.mood + check_in.energy + (UPPER_BOUNDARY - check_in.workload)) / FACTOR_COUNT
-    if average <= HIGH_RISK_AVERAGE:
-        return "high"
-    elif average <= MODERATE_RISK_AVERAGE:
-        return "moderate"
-    else:
-        return "low"
+    total = (UPPER_BOUNDARY - check_in.mood) + (UPPER_BOUNDARY - check_in.energy) + check_in.workload
+    score = int((total / MAX_TOTAL_SCORE) * 100)
+    if score < MIN_SCORE:
+        score = MIN_SCORE
+    elif score > MAX_SCORE:
+        score = MAX_SCORE
+    return risk_level_from_score(score)
 
 def get_valid_rating(entry, field_name):
     value = entry.get()
