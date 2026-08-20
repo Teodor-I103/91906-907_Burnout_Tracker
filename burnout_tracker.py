@@ -2,6 +2,8 @@ import tkinter as tk #Import Tkinter for the GUI
 from tkinter import messagebox #Import messagebox for pop-up validation and information messages
 import datetime
 
+print("Version 2 branch test")
+
 #Named Constants used throughout the app
 FILENAME = "check_ins.txt" #Name of the file where check-ins are saved to
 UPPER_BOUNDARY = 5 #Highest possible rating for mood, energy, and workload
