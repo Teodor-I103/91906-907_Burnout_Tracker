@@ -184,6 +184,44 @@ def build_login_screen():
     root.grid_columnconfigure(0, weight=1)
     root.grid_columnconfigure(1, weight=1)
 
-build_login_screen()
+def build_main_screen(username):
+    clear_screen()
+    root.configure(bg=BG_COLOR)
+    tk.Label(root, text=f"Logged in as: {username}", font=("Arial", 8), bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=0, column=0, columnspan=2, pady=(15, 10))
 
+    mood_entry = labeled_entry(root, 1, "Mood (1-5):", width=10)
+    energy_entry = labeled_entry(root, 2, "Energy (1-5):", width=10)
+    workload_entry = labeled_entry(root, 3, "Workload (1-5):", width=10)
+    tk.Label(root, text="1 = light, 5 = heavy (several deadlines)", font=("Arial", 8), bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=4, column=0, columnspan=2, pady=(0, 10))
+
+    score_label = tk.Label(root, text="", font=("Arial", 14, "bold"), bg=BG_COLOR)
+    score_label.grid(row=5, column=0, columnspan=2, pady=10)
+
+    def user_checkins():
+        result = []
+        for c in all_checkins:
+            if c.username == username:
+                result.append(c)
+        return result
+
+    def refresh_score_label():
+        score = calculate_risk_score(user_checkins())
+        level = risk_level_from_score(score)
+        score_label.config(text=f"Burnout risk: {score} - {level}", fg=score_colour(level))
+
+    def collect_entries():
+        mood = get_valid_rating(mood_entry, "Mood")
+        energy = get_valid_rating(energy_entry, "Energy")
+        workload = get_valid_rating(workload_entry, "Workload")
+        if mood is None or energy is None or workload is None:
+            return
+        new_check_in = Check_In(username, datetime.date.today().isoformat(), mood, energy, workload)
+        all_checkins.append(new_check_in)
+        save_all_checkins(all_checkins)
+        refresh_score_label()
+        messagebox.showinfo("Saved", "Your check-in has been saved.")
+
+    styled_button(root, "Submit check-in", collect_entries).grid(row=6, column=0, columnspan=2, pady=(5, 12))
+
+build_login_screen()
 root.mainloop()
