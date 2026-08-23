@@ -152,62 +152,38 @@ def close_all_popups():
             popup.destroy()
     open_popups.clear()
 
-#Function to refresh the score label with the current burnout risk score and level
-def refresh_score_label():
-    score = calculate_risk_score(check_ins) #Calculate the current burnout risk score based on the check-ins
-    level = risk_level_from_score(score) #Determine the risk level based on the score
-    score_label.config(text=f"Burnout risk: {score} - {level}") #Update the score label with the current burnout risk score and level
+def build_login_screen():
+    clear_screen()
+    root.configure(bg=BG_COLOR)
+    tk.Label(root, text="Flare", font=("Arial", 20, "bold"), bg=BG_COLOR, fg=PRIMARY).grid(row=0, column=0, columnspan=2, pady=(30, 20))
 
-#Function to collect the entries from the user, validate them, create a new check-in, save it, and refresh the score label
-def collect_entries():
-    mood = get_valid_rating(mood_entry, "Mood") #Get and validate the mood rating from the entry box
-    energy = get_valid_rating(energy_entry, "Energy") #Get and validate the energy rating from the entry box
-    workload = get_valid_rating(workload_entry, "Workload") #Get and validate the workload rating from the entry box
-    if mood is None or energy is None or workload is None:
-        return #Messagebox has already told the user what was wrong
-    today = datetime.date.today().isoformat() #Get today's date
-    new_check_in = Check_In(today, mood, energy, workload)
-    check_ins.append(new_check_in) #Add the new check-in to the list
-    save_checkin(new_check_in) #Save the new check-in to the file
-    refresh_score_label() #Refresh the score label to show the updated burnout risk score and level
-    messagebox.showinfo("Saved", "Your check-in has been saved.")
+    username_entry = labeled_entry(root, 1, "Username:")
+    password_entry = labeled_entry(root, 2, "Password:", show="*")
 
-#Submit button that calls collect_entries when clicked
-tk.Button(root, text="Submit check-in", command=collect_entries).pack(pady=5)
+    def on_login():
+        username, password = username_entry.get().strip(), password_entry.get().strip()
+        if username not in users or users[username] != password:
+            messagebox.showerror("Login failed", "Incorrect username or password.")
+            return
+        build_main_screen(username)
 
-#Function to open a new window that displays the history of check-ins
-def open_history():
-    history_window = tk.Toplevel(root) #Create a new window for the history of check-ins
-    history_window.title("Flare Check-in History") #Set the title of the history window
-    history_window.geometry("250x250") #Set the size of the history window
+    def on_signup():
+        username, password = username_entry.get(), password_entry.get()
+        if username == "" or password == "":
+            messagebox.showerror("Invalid input", "Username and password cannot be empty.")
+            return
+        if username in users:
+            messagebox.showerror("Invalid input", "That username is already taken.")
+            return
+        users[username] = password
+        save_user(username, password)
+        messagebox.showinfo("Account created", "You can now log in.")
 
-    tk.Label(history_window, text="Check-in History", font=("Arial", 14)).pack(pady=10) #Label for the history window
+    styled_button(root, "Login", on_login).grid(row=3, column=0, columnspan=2, pady=(20, 6))
+    styled_button(root, "Sign Up", on_signup, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=4, column=0, columnspan=2, pady=6)
+    root.grid_columnconfigure(0, weight=1)
+    root.grid_columnconfigure(1, weight=1)
 
-    if not check_ins:
-        tk.Label(history_window, text="No check-ins yet.").pack(pady=10) #If there are no check-ins, show a message
-    else:
-        for check_in in check_ins:
-            text = f"{check_in.date}: {risk_level_for(check_in)}" #Format the check-in data for display
-            tk.Label(history_window, text=text, anchor="w").pack(fill="x", padx=20) #Display each check-in in the history window
+build_login_screen()
 
-#Function to open a new window that displays a notice based on the current burnout risk score
-def open_notice():
-    notice_window = tk.Toplevel() #Create a new window for the notice
-    notice_window.title("Flare - Notice") #Set the title of the notice window
-    notice_window.geometry("250x150") #Set the size of the notice window
-    score = calculate_risk_score(check_ins)
-    level = risk_level_from_score(score)
-
-    if level == "high": #If the burnout risk level is high, show a message to the user
-        message = "Your check-ins show a high burnout risk. Consider taking a break."
-    else: #If the burnout risk level is moderate or low, show a message to the user
-        message = "Your burnout risk is not currently high. Keep checking in daily."
-    
-    tk.Label(notice_window, text=message, wraplength=200, justify="center").pack(pady=20, padx=10) #Display the notice message in the notice window
-
-tk.Button(root, text="View History", command=open_history).pack(pady=5) #Button that opens the history window when clicked
-tk.Button(root, text="View Notice", command=open_notice).pack(pady=5) #Button that opens the notice window when clicked
-
-refresh_score_label() #Refresh the score label when the program starts to show the current burnout risk score and level
-
-root.mainloop() #Start the Tkinter to run the GUI
+root.mainloop()
