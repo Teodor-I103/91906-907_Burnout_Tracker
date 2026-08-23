@@ -3,7 +3,7 @@ from tkinter import messagebox #Import messagebox for pop-up validation and info
 import datetime
 
 #Named Constants used throughout the app
-FILENAME = "check_ins.txt" #Name of the file where check-ins are saved to
+FILENAME, USERS_FILENAME = "check_ins.txt", "users.txt"
 UPPER_BOUNDARY = 5 #Highest possible rating for mood, energy, and workload
 LOWER_BOUNDARY = 1 #Lowest possible rating for mood, energy, and workload
 MIN_SCORE = 0 #Lowest possible burnout risk score
@@ -37,6 +37,22 @@ class Check_In:
 
     def daily_check_in(self):
         return f"{self.username},{self.date},{self.mood},{self.energy},{self.workload}" #Formats the check-in data as a string for saving to the file.
+
+def load_users(filename=USERS_FILENAME):
+    users = {}
+    try:
+        with open(filename, "r") as file:
+            for line in file:
+                username, password = line.strip().split(",")
+                users[username] = password
+    except FileNotFoundError:
+        pass
+    return users
+
+
+def save_user(username, password, filename=USERS_FILENAME):
+    with open(filename, "w") as file:
+        file.write(f"{username},{password}\n")
 
 def load_check_ins(filename=FILENAME):
     check_ins = []
