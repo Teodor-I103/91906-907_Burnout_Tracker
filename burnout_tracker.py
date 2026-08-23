@@ -108,14 +108,13 @@ def score_colour(level):
 
 #Checks that a value typed into an entry box is a whole number and between 1 and 5
 def get_valid_rating(entry, field_name):
-    value = entry.get() #Get the value from the entry box
     try:
-        value = int(value) #Convert the value to an integer
+        value = int(entry.get())
     except ValueError:
-        messagebox.showerror("Invalid input", f"{field_name} must be a whole number.") #Show an error message if the value is not a whole number
+        messagebox.showerror("Invalid input", f"{field_name} must be a whole number.")
         return None
     if value < LOWER_BOUNDARY or value > UPPER_BOUNDARY:
-        messagebox.showerror("Invalid input", f"{field_name} must be between {LOWER_BOUNDARY} and {UPPER_BOUNDARY}.") #Show an error message if the value is not between 1 and 5
+        messagebox.showerror("Invalid input", f"{field_name} must be between {LOWER_BOUNDARY} and {UPPER_BOUNDARY}.")
         return None
     return value
 
