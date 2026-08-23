@@ -28,14 +28,15 @@ HIGH_COLOUR = "#B0645A" #Colour for high burnout risk
 
 #Represents a single check-in, holding the data and ratings.
 class Check_In:
-    def __init__(self, date, mood, energy, workload):
+    def __init__(self, username, date, mood, energy, workload):
+        self.username = username
         self.date = date #Date of the check-in
         self.mood = mood #Mood rating (1-5)
         self.energy = energy #Energy rating (1-5)
         self.workload = workload #Workload rating (1-5)
 
     def daily_check_in(self):
-        return f"{self.date},{self.mood},{self.energy},{self.workload}" #Formats the check-in data as a string for saving to the file.
+        return f"{self.username},{self.date},{self.mood},{self.energy},{self.workload}" #Formats the check-in data as a string for saving to the file.
 
 #Reads the check-ins from the file and returns a list of Check_In objects. If the file does not exist, it returns an empty list.
 def load_check_ins(filename=FILENAME):
@@ -111,7 +112,7 @@ def styled_entry(parent, width=18, show=None):
                      highlightthickness=1, highlightbackground="#DAD6F5", highlightcolor=PRIMARY)
 
 def labeled_entry(parent, row, label_text, width=18, show=None, prefill=None):
-    tk.Label(parent, text=label_text bg=BG_COLOR, fg=TEXT_COLOR).grid(row=row, column=0, sticky="e", padx=(20, 10), pady=6)
+    tk.Label(parent, text=label_text, bg=BG_COLOR, fg=TEXT_COLOR).grid(row=row, column=0, sticky="e", padx=(20, 10), pady=6)
     entry = styled_entry(parent, width=width, show=show)
     if prefill is not None:
         entry.insert(0, str(prefill))
