@@ -134,27 +134,23 @@ def labeled_entry(parent, row, label_text, width=18, show=None, prefill=None):
     entry.grid(row=row, column=1, sticky="w", padx=(0, 20), pady=6)
     return entry
 
-check_ins = load_check_ins() #Load the check-ins from the file when the program starts
+all_checkins = load_check_ins()
+users = load_users()
+open_popups = []
 
-#Create the main window for the GUI and set its title and size
 root = tk.Tk()
-root.title("Flare") #Title of the window
-root.geometry("300x320") #Size of the window
+root.title("Flare")
+root.geometry("340x480")
 
-tk.Label(root, text="Mood (1-5):").pack(pady=(15, 0)) #Label for the mood entry box
-mood_entry = tk.Entry(root, width=10) #Entry box for the mood rating
-mood_entry.pack()
+def clear_screen():
+    for widget in root.winfo_children():
+        widget.destroy()
 
-tk.Label(root, text="Energy (1-5):").pack(pady=(10, 0)) #Label for the energy entry box
-energy_entry = tk.Entry(root, width=10) #Entry box for the energy rating
-energy_entry.pack()
-
-tk.Label(root, text="Workload (1-5):").pack(pady=(10, 0)) #Label for the workload entry box
-workload_entry = tk.Entry(root, width=10) #Entry box for the workload rating
-workload_entry.pack()
-
-score_label = tk.Label(root, text="", font=("Arial", 12)) #Label to display the burnout risk score and level
-score_label.pack(pady=15)
+def close_all_popups():
+    for popup in open_popups:
+        if popup.winfo_exists():
+            popup.destroy()
+    open_popups.clear()
 
 #Function to refresh the score label with the current burnout risk score and level
 def refresh_score_label():
