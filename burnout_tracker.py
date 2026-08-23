@@ -102,6 +102,22 @@ def get_valid_rating(entry, field_name):
         return None
     return value
 
+def styled_button(parent, text, command, bg=PRIMARY, fg="white", active_bg=PRIMARY_DARK):
+    return tk.Button(parent, text=text, command=command, bg=bg, fg=fg, activebackground=active_bg,
+                      activeforeground=fg, relief="flat", font=("Arial", 10, "bold"), padx=10, pady=6, bd=0)
+
+def styled_entry(parent, width=18, show=None):
+    return tk.Entry(parent, width=width, show=show, bg="white", fg=TEXT_COLOR, relief="solid", bd=1,
+                     highlightthickness=1, highlightbackground="#DAD6F5", highlightcolor=PRIMARY)
+
+def labeled_entry(parent, row, label_text, width=18, show=None, prefill=None):
+    tk.Label(parent, text=label_text bg=BG_COLOR, fg=TEXT_COLOR).grid(row=row, column=0, sticky="e", padx=(20, 10), pady=6)
+    entry = styled_entry(parent, width=width, show=show)
+    if prefill is not None:
+        entry.insert(0, str(prefill))
+    entry.grid(row=row, column=1, sticky="w", padx=(0, 20), pady=6)
+    return entry
+
 check_ins = load_check_ins() #Load the check-ins from the file when the program starts
 
 #Create the main window for the GUI and set its title and size
