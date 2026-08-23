@@ -2,8 +2,6 @@ import tkinter as tk #Import Tkinter for the GUI
 from tkinter import messagebox #Import messagebox for pop-up validation and information messages
 import datetime
 
-print("Version 2 branch test")
-
 #Named Constants used throughout the app
 FILENAME = "check_ins.txt" #Name of the file where check-ins are saved to
 UPPER_BOUNDARY = 5 #Highest possible rating for mood, energy, and workload
@@ -14,6 +12,19 @@ HIGH_RISK_SCORE = 65 #Score threshold for high burnout risk
 MODERATE_RISK_SCORE = 35 #Score threshold for moderate burnout risk
 WEEK = 7 #Number of day used to calculate the average burnout risk score
 MAX_TOTAL_SCORE = 13 #Highest possible total score from a single check-in
+
+#Colour palette used throughout the app, instead of Tkinter's default grey/white look
+BG_COLOR = "#F2F5F9" #Main window background colour
+CARD_BG = "#FFFFFF" #Background colour for cards/panels
+TEXT_COLOR = "#1B2A41" #Main text colour
+SUBTEXT_COLOR = "#7A8AA0" #Muted text colour for secondary labels
+PRIMARY = "#1E3A5F" #Main button colour
+PRIMARY_DARK = "#142A47" #Darker shade for button press/hover
+DANGER = "#E74C3C" #Colour for destructive actions (e.g. logout)
+DANGER_DARK = "#C0392B" #Darker shade for danger button press/hover
+LOW_COLOUR = "#4C9A6B" #Colour for low burnout risk
+MODERATE_COLOUR = "#C99A3D" #Colour for moderate burnout risk
+HIGH_COLOUR = "#B0645A" #Colour for high burnout risk
 
 #Represents a single check-in, holding the data and ratings.
 class Check_In:
