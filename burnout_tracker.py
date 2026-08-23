@@ -38,22 +38,21 @@ class Check_In:
     def daily_check_in(self):
         return f"{self.username},{self.date},{self.mood},{self.energy},{self.workload}" #Formats the check-in data as a string for saving to the file.
 
-#Reads the check-ins from the file and returns a list of Check_In objects. If the file does not exist, it returns an empty list.
 def load_check_ins(filename=FILENAME):
+    check_ins = []
     try:
-        check_ins = [] #List to hold the check-ins
-        with open(filename, "r") as file: #Open the file for reading
+        with open(filename, "r") as file:
             for line in file:
-                date, mood, energy, workload = line.split(",") #Split the line into its components
-                check_ins.append(Check_In(date, int(mood), int(energy), int(workload))) #Create a Check_In object and add it to the list
-        return check_ins #Give back the list of check-ins
+                username, date, mood, energy, workload = line.split(",")
+                check_ins.append(Check_In(username, date, int(mood), int(energy), int(workload)))
     except FileNotFoundError:
-        return check_ins #If the file does not exist, return an empty list
+        pass
+    return check_ins
 
-#Saves a new check-in to the file by appending it to the end of the file.    
-def save_checkin(check_in, filename=FILENAME):
-    with open(filename, "a") as file: #Open the file for appending
-            file.write(check_in.daily_check_in() + "\n") #Write the check-in data to the file, followed by a newline character
+def save_all_checkins(all_checkins, filename=FILENAME)
+    with open(filename, "w") as file:
+        for check_in in all_checkins:
+            file.write(check_in.daily_check_in() + "\n")
 
 #Calculates the average burnout risk score based on the last 7 days of check-ins. If there are no check-ins, it returns a score of 0.
 def calculate_risk_score(check_ins):
