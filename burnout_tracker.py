@@ -49,7 +49,6 @@ def load_users(filename=USERS_FILENAME):
         pass
     return users
 
-
 def save_user(username, password, filename=USERS_FILENAME):
     with open(filename, "w") as file:
         file.write(f"{username},{password}\n")
@@ -65,10 +64,17 @@ def load_check_ins(filename=FILENAME):
         pass
     return check_ins
 
-def save_all_checkins(all_checkins, filename=FILENAME)
+def save_all_checkins(all_checkins, filename=FILENAME):
     with open(filename, "w") as file:
         for check_in in all_checkins:
             file.write(check_in.daily_check_in() + "\n")
+
+def limit_score(score):
+    if score < MIN_SCORE:
+        return MIN_SCORE
+    elif score > MAX_SCORE:
+        return MAX_SCORE
+    return score
 
 #Calculates the average burnout risk score based on the last 7 days of check-ins. If there are no check-ins, it returns a score of 0.
 def calculate_risk_score(check_ins):
@@ -79,31 +85,26 @@ def calculate_risk_score(check_ins):
     for check_in in recent:
         total += (UPPER_BOUNDARY - check_in.mood) + (UPPER_BOUNDARY - check_in.energy) + check_in.workload #Calculate the total score based on mood, energy, and workload ratings
     average = total / len(recent)
-    score = int((average / MAX_TOTAL_SCORE) * 100) #Convert the average score to a percentage
-    if score < MIN_SCORE: #If the score is below the minimum, set it to the minimum
-        score = MIN_SCORE
-    elif score > MAX_SCORE: #If the score is above the maximum, set it to the maximum
-        score = MAX_SCORE
-    return score #Return the calculated burnout risk score
-
+    return limit_score(int((average / MAX_TOTAL_SCORE) * 100))
+   
 #Turns the numeric risk score into a string of "Low", "Moderate", or "high"
 def risk_level_from_score(score):
     if score >= HIGH_RISK_SCORE: #If the score is above the high risk threshold, return "high"
         return "high"
     elif score >= MODERATE_RISK_SCORE: #If the score is above the moderate risk threshold, return "moderate"
         return "moderate"
-    else:
-        return "low"
+    return "low"
 
-#Works out the risk level for a single check-in for that day only
-def risk_level_for(check_in):
-    total = (UPPER_BOUNDARY - check_in.mood) + (UPPER_BOUNDARY - check_in.energy) + check_in.workload #Calculate the total score based on mood, energy, and workload ratings
-    score = int((total / MAX_TOTAL_SCORE) * 100)
-    if score < MIN_SCORE: #If the score is below the minimum, set it to the minimum
-        score = MIN_SCORE
-    elif score > MAX_SCORE: #If the score is above the maximum, set it to the maximum
-        score = MAX_SCORE
-    return risk_level_from_score(score)
+def score_for(check_in):
+    total = (UPPER_BOUNDARY - check_in.mood) + (UPPER_BOUNDARY - check_in.energy) + check_in.workload
+    return limit_score(int((total / MAX_TOTAL_SCORE) * 100))
+
+def score_colour(level):
+    if level == "high":
+        return HIGH_COLOUR
+    elif level == "moderate":
+        return MODERATE_COLOUR
+    return LOW_COLOUR
 
 #Checks that a value typed into an entry box is a whole number and between 1 and 5
 def get_valid_rating(entry, field_name):
