@@ -50,7 +50,7 @@ def load_users(filename=USERS_FILENAME):
     return users
 
 def save_user(username, password, filename=USERS_FILENAME):
-    with open(filename, "w") as file:
+    with open(filename, "a") as file:
         file.write(f"{username},{password}\n")
 
 def load_check_ins(filename=FILENAME):
