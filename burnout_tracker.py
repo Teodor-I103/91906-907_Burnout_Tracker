@@ -58,7 +58,7 @@ def load_check_ins(filename=FILENAME):
     try:
         with open(filename, "r") as file:
             for line in file:
-                username, date, mood, energy, workload = line.split(",")
+                username, date, mood, energy, workload = line.strip().split(",")
                 check_ins.append(Check_In(username, date, int(mood), int(energy), int(workload)))
     except FileNotFoundError:
         pass
@@ -168,7 +168,7 @@ def build_login_screen():
         build_main_screen(username)
 
     def on_signup():
-        username, password = username_entry.get(), password_entry.get()
+        username, password = username_entry.get().strip(), password_entry.get().strip()
         if username == "" or password == "":
             messagebox.showerror("Invalid input", "Username and password cannot be empty.")
             return
