@@ -281,7 +281,21 @@ def build_main_screen(username):
 
         build_rows()
 
+    def open_notice():
+        notice_window = tk.Toplevel(root)
+        open_popups.append(notice_window)
+        notice_window.title("Flare - Notice")
+        notice_window.geometry("260x160")
+        notice_window.configure(bg=BG_COLOR)
+        level = risk_level_from_score(calculate_risk_score(all_checkins))
+        if level == "high":
+            message = "Your check-ins show a high burnout risk. Consider taking a break."
+        else:
+            message = "Your burnout risk is not currently high. Keep checking in daily."
+        tk.Label(notice_window, text=message, wraplength=210, justify="center", bg=BG_COLOR, fg=TEXT_COLOR).grid(row=0, column=0, padx=15, pady=25)
+
     styled_button(root, "View History", open_history, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=7, column=0, columnspan=2, pady=5)
+    styled_button(root, "View Notice", open_notice, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=8, column=0, columnspan=2, pady=5)
 
 build_login_screen()
 root.mainloop()
