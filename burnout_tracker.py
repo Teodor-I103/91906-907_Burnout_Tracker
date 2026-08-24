@@ -250,6 +250,35 @@ def build_main_screen(username):
                           fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=1, padx=4)
                 tk.Button(rows_frame, text="Delete", command=lambda: delete_checkin(check_in),
                           bg=DANGER, fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=2, padx=4)
+        def delete_checkin(check_in):
+            all_checkins.remove(check_in)
+            save_all_checkins(all_checkins)
+            refresh_score_label()
+            build_rows()
+
+        def open_edit(check_in):
+            edit_window = tk.Toplevel(history_window)
+            edit_window.title("Edit check-in")
+            edit_window.geometry("240x260")
+            edit_window.configure(bg=BG_COLOR)
+            edit_mood = labeled_entry(edit_window, 0, "Mood (1-5):", width=10, prefill=check_in.mood)
+            edit_energy = labeled_entry(edit_window, 1, "Energy (1-5):", width=10, prefill=check_in.energy)
+            edit_workload = labeled_entry(edit_window, 2, "Workload (1-5):", width=10, prefill=check_in.workload)
+        
+            def save_edit():
+                mood = get_valid_rating(edit_mood, "Mood")
+                energy = get_valid_rating(edit_energy, "Energy")
+                workload = get_valid_rating(edit_workload, "Workload")
+                if mood is None or energy is None or workload is None:
+                    return
+                check_in.mood, check_in.energy, check_in.workload = mood, energy, workload
+                save_all_checkins(all_checkins)
+                refresh_score_label()
+                build_rows()
+                edit_window.destroy()
+        
+            styled_button(edit_window, "Save", save_edit).grid(row=3, column=0, columnspan=2, pady=15)
+
         build_rows()
 
     styled_button(root, "View History", open_history, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=7, column=0, columnspan=2, pady=5)
