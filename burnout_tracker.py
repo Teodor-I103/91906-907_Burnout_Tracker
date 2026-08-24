@@ -223,5 +223,36 @@ def build_main_screen(username):
 
     styled_button(root, "Submit check-in", collect_entries).grid(row=6, column=0, columnspan=2, pady=(5, 12))
 
+    def open_history():
+        history_window = tk.Toplevel(root)
+        open_popups.append(history_window)
+        history_window.title("Flare Check-in History")
+        history_window.geometry("320x340")
+        history_window.configure(bg=BG_COLOR)
+        tk.Label(history_window, text="Check-in History", font=("Arial", 14, "bold"), bg=BG_COLOR, fg=TEXT_COLOR).grid(row=0, column=0, columnspan=3, pady=10)
+
+        rows_frame = tk.Frame(history_window, bg=BG_COLOR)
+        rows_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=10)
+
+        def build_rows():
+            for widget in rows_frame.winfo_children():
+                widget.destroy()
+            entries = user_checkins()
+            if not entries:
+                tk.Label(rows_frame, text="No check-ins yet.", bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=0, column=0, columnspan=3, pady=10)
+                return
+            for row_index, check_in in enumerate(entries):
+                score = score_for(check_in)
+                level = risk_level_from_score(score)
+                tk.Label(rows_frame, text=f"{check_in.date}: {score} - {level}", anchor="w", bg=BG_COLOR,
+                         fg=score_colour(level), font=("Arial", 9, "bold")).grid(row=row_index, column=0, sticky="w", pady=3)
+                tk.Button(rows_frame, text="Edit", command=lambda: open_edit(check_in), bg=PRIMARY,
+                          fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=1, padx=4)
+                tk.Button(rows_frame, text="Delete", command=lambda: delete_checkin(check_in),
+                          bg=DANGER, fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=2, padx=4)
+        build_rows()
+
+    styled_button(root, "View History", open_history, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=7, column=0, columnspan=2, pady=5)
+
 build_login_screen()
 root.mainloop()
