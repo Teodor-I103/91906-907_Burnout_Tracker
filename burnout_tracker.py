@@ -297,5 +297,14 @@ def build_main_screen(username):
     styled_button(root, "View History", open_history, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=7, column=0, columnspan=2, pady=5)
     styled_button(root, "View Notice", open_notice, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=8, column=0, columnspan=2, pady=5)
 
+    def logout():
+        close_all_popups()
+        build_login_screen()
+
+    styled_button(root, "Logout", logout, bg=DANGER, active_bg=DANGER_DARK).grid(row=9, column=0, columnspan=2, pady=(15, 20))
+    root.grid_columnconfigure(0, weight=1)
+    root.grid_columnconfigure(1, weight=1)
+    refresh_score_label()
+    
 build_login_screen()
 root.mainloop()
