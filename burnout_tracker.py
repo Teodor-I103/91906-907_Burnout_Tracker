@@ -287,7 +287,7 @@ def build_main_screen(username):
         notice_window.title("Flare - Notice")
         notice_window.geometry("260x160")
         notice_window.configure(bg=BG_COLOR)
-        level = risk_level_from_score(calculate_risk_score(all_checkins))
+        level = risk_level_from_score(calculate_risk_score(user_checkins()))
         if level == "high":
             message = "Your check-ins show a high burnout risk. Consider taking a break."
         else:
