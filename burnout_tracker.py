@@ -246,9 +246,9 @@ def build_main_screen(username):
                 level = risk_level_from_score(score)
                 tk.Label(rows_frame, text=f"{check_in.date}: {score} - {level}", anchor="w", bg=BG_COLOR,
                          fg=score_colour(level), font=("Arial", 9, "bold")).grid(row=row_index, column=0, sticky="w", pady=3)
-                tk.Button(rows_frame, text="Edit", command=lambda: open_edit(check_in), bg=PRIMARY,
+                tk.Button(rows_frame, text="Edit", command=lambda check_in=check_in: open_edit(check_in), bg=PRIMARY,
                           fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=1, padx=4)
-                tk.Button(rows_frame, text="Delete", command=lambda: delete_checkin(check_in),
+                tk.Button(rows_frame, text="Delete", command=lambda check_in=check_in: delete_checkin(check_in),
                           bg=DANGER, fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=2, padx=4)
         def delete_checkin(check_in):
             all_checkins.remove(check_in)
