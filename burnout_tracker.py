@@ -2,6 +2,8 @@ import tkinter as tk #Import Tkinter for the GUI
 from tkinter import messagebox #Import messagebox for pop-up validation and information messages
 import datetime #datetime module to get the current date for check-ins
 
+#Version 3 inital commit test
+
 #Named Constants used throughout the app
 FILENAME, USERS_FILENAME = "check_ins.txt", "users.txt" #File names for storing check-in data and user details
 UPPER_BOUNDARY = 5 #Highest possible rating for mood, energy, and workload
