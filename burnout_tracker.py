@@ -305,14 +305,13 @@ def build_main_screen(username):
         history_window = tk.Toplevel(root)
         open_popups.append(history_window)
         history_window.title("Flare Check-in History")
-        history_window.geometry("320x340")
+        history_window.geometry("340x360")
         history_window.configure(bg=BG_COLOR)
         tk.Label(history_window, text="Check-in History", font=("Arial", 14, "bold"), bg=BG_COLOR, fg=TEXT_COLOR).grid(row=0, column=0, columnspan=3, pady=10)
 
         rows_frame = tk.Frame(history_window, bg=BG_COLOR)
         rows_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=10)
 
-        #Builds the rows of check-in history in the history pop-up window, displaying the date, score, risk level, and buttons for editing or deleting each check-in
         def build_rows():
             for widget in rows_frame.winfo_children():
                 widget.destroy()
@@ -323,13 +322,17 @@ def build_main_screen(username):
             for row_index, check_in in enumerate(entries):
                 score = score_for(check_in)
                 level = risk_level_from_score(score)
-                tk.Label(rows_frame, text=f"{check_in.date}: {score} - {level}", anchor="w", bg=BG_COLOR,
-                         fg=score_colour(level), font=("Arial", 9, "bold")).grid(row=row_index, column=0, sticky="w", pady=3)
-                tk.Button(rows_frame, text="Edit", command=lambda check_in=check_in: open_edit(check_in), bg=PRIMARY,
-                          fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=1, padx=4)
-                tk.Button(rows_frame, text="Delete", command=lambda check_in=check_in: delete_checkin(check_in),
-                          bg=DANGER, fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=2, padx=4)
+                text = f"{check_in.date}: {score}-{level}  (M{check_in.energy} E{check_in.mood} W{check_in.workload})"
 
+                tk.Label(rows_frame, text=text, anchor="w", bg=BG_COLOR, fg=score_colour(level),
+                         font=("Arial", 8, "bold")).grid(row=row_index, column=0, sticky="w", pady=3)
+                
+                tk.Button(rows_frame, text="Edit", command=lambda check_in=check_in: open_edit(check_in), bg=PRIMARY,
+                          fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=1, padx=2)
+                
+                tk.Button(rows_frame, text="Delete", command=lambda check_in=check_in: delete_checkin(check_in),
+                          bg=DANGER, fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=2, padx=2)
+                
         #Functions for deleting and editing check-ins, allowing the user to manage their check-in history from the history pop-up window.
         def delete_checkin(check_in):
             all_checkins.remove(check_in)
