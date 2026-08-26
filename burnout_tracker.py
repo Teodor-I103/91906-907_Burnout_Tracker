@@ -1,18 +1,17 @@
 import tkinter as tk #Import Tkinter for the GUI
 from tkinter import messagebox #Import messagebox for pop-up validation and information messages
 import datetime #datetime module to get the current date for check-ins
-
-#Version 3 inital commit test
+from cryptography.fernet import Fernet #Import Fernet for password encryption and decryption
 
 #Named Constants used throughout the app
-FILENAME, USERS_FILENAME = "check_ins.txt", "users.txt" #File names for storing check-in data and user details
+FILENAME, USERS_FILENAME, KEY_FILENAME = "check_ins.txt", "users.txt", "secret.key"
 UPPER_BOUNDARY = 5 #Highest possible rating for mood, energy, and workload
 LOWER_BOUNDARY = 1 #Lowest possible rating for mood, energy, and workload
 MIN_SCORE = 0 #Lowest possible burnout risk score
 MAX_SCORE = 100 #Highest possible burnout risk score
 HIGH_RISK_SCORE = 65 #Score threshold for high burnout risk
 MODERATE_RISK_SCORE = 35 #Score threshold for moderate burnout risk
-WEEK = 7 #Number of day used to calculate the average burnout risk score
+WEEK, MONTH = 7, 30
 MAX_TOTAL_SCORE = 13 #Highest possible total score from a single check-in
 
 #Colour palette used throughout the app, instead of Tkinter's default grey/white look
@@ -40,6 +39,19 @@ class Check_In:
     #Method to format the check-in data as a string for saving to the file
     def daily_check_in(self):
         return f"{self.username},{self.date},{self.mood},{self.energy},{self.workload}"
+
+def load_or_create_key(filename=KEY_FILENAME):
+    try:
+        with open(filename, "rb") as file:
+            return file.read()
+    except FileNotFoundError:
+        key = Fernet.generate_key()
+        with open(filename, "wb") as file:
+            file.write(key)
+        return key
+
+
+fernet = Fernet(load_or_create_key())
 
 #Functions for loading and saving user data and check-ins to files
 def load_users(filename=USERS_FILENAME):
