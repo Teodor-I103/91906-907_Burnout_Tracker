@@ -191,27 +191,40 @@ def build_login_screen():
         username, password = username_entry.get().strip(), password_entry.get().strip()
         if username not in users:
             messagebox.showerror("Login failed", "Incorrect username or password.")
-            returnW
+            return
         if users[username] != password:
             messagebox.showerror("Login failed", "Incorrect username or password.")
             return
         build_main_screen(username)
+
     #Function for handling sign-up action, validation and saving new users.
-    def on_signup():
-        username, password = username_entry.get().strip(), password_entry.get().strip()
-        if username == "" or password == "":
-            messagebox.showerror("Invalid input", "Username and password cannot be empty.")
-            return
-        if username in users:
-            messagebox.showerror("Invalid input", "That username is already taken.")
-            return
-        users[username] = password
-        save_user(username, password)
-        messagebox.showinfo("Account created", "You can now log in.")
+    def open_signup():
+        signup_window = tk.Toplevel(root)
+        signup_window.title("Flare - Sign Up")
+        signup_window.geometry("260x220")
+        signup_window.configure(bg=BG_COLOR)
+
+        su_username_entry = labeled_entry(signup_window, 0, "Username:")
+        su_password_entry = labeled_entry(signup_window, 1, "Password:", show="*")
+
+        def on_create_account():
+            username, password = su_username_entry.get().strip(), su_password_entry.get().strip()
+            if username == "" or password == "":
+                messagebox.showerror("Invalid input", "Username and password cannot be empty.")
+                return
+            if username in users:
+                messagebox.showerror("Invalid input", "That username is already taken.")
+                return
+            encrypted_password = fernet.encrypt(password.encode()).decode()
+            users[username] = encrypted_password
+            save_user(username, encrypted_password)
+            messagebox.showinfo("Account created", f"Account '{username}' created. You can now log in.")
+
+        styled_button(signup_window, "Create Account", on_create_account).grid(row=2, column=0, columnspan=2, pady=15)
 
     #Create and place the login and sign-up buttons on the login screen.
     styled_button(root, "Login", on_login).grid(row=3, column=0, columnspan=2, pady=(20, 6))
-    styled_button(root, "Sign Up", on_signup, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=4, column=0, columnspan=2, pady=6)
+    styled_button(root, "Sign Up", open_signup, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=4, column=0, columnspan=2, pady=6)
     root.grid_columnconfigure(0, weight=1)
     root.grid_columnconfigure(1, weight=1)
 
