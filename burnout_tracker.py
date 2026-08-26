@@ -158,6 +158,10 @@ def labeled_entry(parent, row, label_text, width=18, show=None, prefill=None):
     entry.grid(row=row, column=1, sticky="w", padx=(0, 20), pady=6)
     return entry
 
+def rating_description(parent, row, text):
+    # Small helper text placed under a rating entry, e.g. explaining what 1 vs 5 means
+    tk.Label(parent, text=text, font=("Arial", 8), bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=row, column=0, columnspan=2, pady=(0, 6))
+
 all_checkins = load_check_ins()
 users = load_users()
 open_popups = [] #List to keep track of all open pop-up windows, so they can be closed when logging out.
@@ -236,13 +240,19 @@ def build_main_screen(username):
     root.configure(bg=BG_COLOR)
     tk.Label(root, text=f"Logged in as: {username}", font=("Arial", 8), bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=0, column=0, columnspan=2, pady=(15, 10))
 
-    mood_entry = labeled_entry(root, 1, "Mood (1-5):", width=10)
-    energy_entry = labeled_entry(root, 2, "Energy (1-5):", width=10)
-    workload_entry = labeled_entry(root, 3, "Workload (1-5):", width=10)
+    mood_entry = labeled_entry(root, 1, "😊 Mood (1-5):", width=10)
+    rating_description(root, 2, "1 = very low, 5 = feeling great")
+
+    energy_entry = labeled_entry(root, 2, "⚡ Energy (1-5):", width=10)
+    rating_description(root, 4, "1 = exhausted, 5 = fully energised")
+
+    workload_entry = labeled_entry(root, 5, "📚 Workload (1-5):", width=10)
+    rating_description(root, 6, "1 = light, 5 = heavy (several deadlines)")
+
     tk.Label(root, text="1 = light, 5 = heavy (several deadlines)", font=("Arial", 8), bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=4, column=0, columnspan=2, pady=(0, 10))
 
     score_label = tk.Label(root, text="", font=("Arial", 14, "bold"), bg=BG_COLOR)
-    score_label.grid(row=5, column=0, columnspan=2, pady=10)
+    score_label.grid(row=7, column=0, columnspan=2, pady=10)
 
     #Returns a list of all check-ins for the currently logged-in user, used to calculate their burnout risk score and display their history.
     def user_checkins():
