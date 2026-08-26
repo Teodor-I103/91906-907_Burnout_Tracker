@@ -168,7 +168,7 @@ open_popups = [] #List to keep track of all open pop-up windows, so they can be 
 
 root = tk.Tk()
 root.title("Flare")
-root.geometry("340x480")
+root.geometry("340x580")
 
 #Clear the main window of all widgets, used when switching between login and main screens.
 def clear_screen():
@@ -253,10 +253,10 @@ def build_main_screen(username):
     score_label.grid(row=8, column=0, columnspan=2, pady=10)
 
     tk.Label(root, text="For more information, click 'Notice'", font=("Arial", 8, "italic"),
-                 bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=8, column=0, columnspan=2, pady=(0, 6))
-    
+                 bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=9, column=0, columnspan=2, pady=(0, 6))
+
     stats_label = tk.Label(root, text="", font=("Arial", 9), bg=BG_COLOR, fg=TEXT_COLOR, justify="center")
-    stats_label.grid(row=9, column=0, columnspan=2, pady=(0, 10))
+    stats_label.grid(row=10, column=0, columnspan=2, pady=(0, 10))
     
     #Returns a list of all check-ins for the currently logged-in user, used to calculate their burnout risk score and display their history.
     def user_checkins():
@@ -298,7 +298,7 @@ def build_main_screen(username):
         messagebox.showinfo("Saved", "Your check-in has been saved.")
 
     #Create and place the submit button for the check-in entries on the main screen.
-    styled_button(root, "Submit check-in", collect_entries).grid(row=9, column=0, columnspan=2, pady=(5, 12))
+    styled_button(root, "Submit check-in", collect_entries).grid(row=11, column=0, columnspan=2, pady=(5, 12))
 
     #Functions for opening the history and notice pop-up windows, allowing the user to view their check-in history and receive a notice about their burnout risk level.
     def open_history():
@@ -375,7 +375,7 @@ def build_main_screen(username):
         notice_window.title("Flare - Notice")
         notice_window.geometry("260x160")
         notice_window.configure(bg=BG_COLOR)
-        level = risk_level_from_score(calculate_average_score(user_checkins()))
+        level = risk_level_from_score(calculate_average_score(user_checkins(), WEEK))
         if level == "high":
             message = "Your check-ins show a high burnout risk. Consider taking a break."
         else:
@@ -383,8 +383,8 @@ def build_main_screen(username):
         tk.Label(notice_window, text=message, wraplength=210, justify="center", bg=BG_COLOR, fg=TEXT_COLOR).grid(row=0, column=0, padx=15, pady=25)
 
     #Create and place the buttons for viewing history and viewing notice on the main screen.
-    styled_button(root, "View History", open_history, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=10, column=0, columnspan=2, pady=5)
-    styled_button(root, "View Notice", open_notice, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=11, column=0, columnspan=2, pady=5)
+    styled_button(root, "View History", open_history, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=12, column=0, columnspan=2, pady=5)
+    styled_button(root, "View Notice", open_notice, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=13, column=0, columnspan=2, pady=5)
 
     #Function for logging out, closing all pop-up windows, and returning to the login screen.
     def logout():
@@ -392,7 +392,7 @@ def build_main_screen(username):
         build_login_screen()
 
     #Create and place the logout button on the main screen, allowing the user to log out and return to the login screen.
-    styled_button(root, "Logout", logout, bg=DANGER, active_bg=DANGER_DARK).grid(row=12, column=0, columnspan=2, pady=(15, 20))
+    styled_button(root, "Logout", logout, bg=DANGER, active_bg=DANGER_DARK).grid(row=14, column=0, columnspan=2, pady=(15, 20))
     root.grid_columnconfigure(0, weight=1)
     root.grid_columnconfigure(1, weight=1)
     refresh_score_label() #Refresh the burnout risk score when the main screen launches.
