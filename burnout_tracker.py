@@ -59,16 +59,16 @@ def load_users(filename=USERS_FILENAME):
     try:
         with open(filename, "r") as file:
             for line in file:
-                username, password = line.strip().split(",") #Load each username and password from the file and store them in a dictionary
-                users[username] = password
+                username, encrypted_password = line.strip().split(",")
+                users[username] = encrypted_password
     except FileNotFoundError:
         pass
     return users
 
 #Function to save a new user to the users file
-def save_user(username, password, filename=USERS_FILENAME):
+def save_user(username, encrypted_password, filename=USERS_FILENAME):
     with open(filename, "a") as file:
-        file.write(f"{username},{password}\n")
+        file.write(f"{username},{encrypted_password}\n")
 
 #Function to load all check-ins from the check-in save file
 def load_check_ins(filename=FILENAME):
