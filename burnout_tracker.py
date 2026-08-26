@@ -189,11 +189,13 @@ def build_login_screen():
     #Functions for handling login and sign-up actions, validation and saving new users.
     def on_login():
         username, password = username_entry.get().strip(), password_entry.get().strip()
-        if username not in users or users[username] != password:
+        if username not in users:
+            messagebox.showerror("Login failed", "Incorrect username or password.")
+            returnW
+        if users[username] != password:
             messagebox.showerror("Login failed", "Incorrect username or password.")
             return
         build_main_screen(username)
-
     #Function for handling sign-up action, validation and saving new users.
     def on_signup():
         username, password = username_entry.get().strip(), password_entry.get().strip()
