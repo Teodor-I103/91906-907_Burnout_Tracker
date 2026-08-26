@@ -192,7 +192,8 @@ def build_login_screen():
         if username not in users:
             messagebox.showerror("Login failed", "Incorrect username or password.")
             return
-        if users[username] != password:
+        decrypted_password = fernet.decrypt(users[username].encode()).decode()
+        if decrypted_password != password:
             messagebox.showerror("Login failed", "Incorrect username or password.")
             return
         build_main_screen(username)
@@ -219,6 +220,7 @@ def build_login_screen():
             users[username] = encrypted_password
             save_user(username, encrypted_password)
             messagebox.showinfo("Account created", f"Account '{username}' created. You can now log in.")
+            signup_window.destroy()
 
         styled_button(signup_window, "Create Account", on_create_account).grid(row=2, column=0, columnspan=2, pady=15)
 
