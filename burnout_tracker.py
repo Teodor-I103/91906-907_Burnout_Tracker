@@ -1,9 +1,9 @@
 import tkinter as tk #Import Tkinter for the GUI
 from tkinter import messagebox #Import messagebox for pop-up validation and information messages
-import datetime
+import datetime #datetime module to get the current date for check-ins
 
 #Named Constants used throughout the app
-FILENAME = "check_ins.txt" #Name of the file where check-ins are saved to
+FILENAME, USERS_FILENAME = "check_ins.txt", "users.txt" #File names for storing check-in data and user details
 UPPER_BOUNDARY = 5 #Highest possible rating for mood, energy, and workload
 LOWER_BOUNDARY = 1 #Lowest possible rating for mood, energy, and workload
 MIN_SCORE = 0 #Lowest possible burnout risk score
@@ -13,33 +13,74 @@ MODERATE_RISK_SCORE = 35 #Score threshold for moderate burnout risk
 WEEK = 7 #Number of day used to calculate the average burnout risk score
 MAX_TOTAL_SCORE = 13 #Highest possible total score from a single check-in
 
+#Colour palette used throughout the app, instead of Tkinter's default grey/white look
+BG_COLOR = "#F2F5F9" #Main window background colour
+CARD_BG = "#FFFFFF" #Background colour for cards/panels
+TEXT_COLOR = "#1B2A41" #Main text colour
+SUBTEXT_COLOR = "#7A8AA0" #Muted text colour for secondary labels
+PRIMARY = "#1E3A5F" #Main button colour
+PRIMARY_DARK = "#142A47" #Darker shade for button press/hover
+DANGER = "#E74C3C" #Colour for destructive actions (e.g. logout)
+DANGER_DARK = "#C0392B" #Darker shade for danger button press/hover
+LOW_COLOUR = "#4C9A6B" #Colour for low burnout risk
+MODERATE_COLOUR = "#C99A3D" #Colour for moderate burnout risk
+HIGH_COLOUR = "#B0645A" #Colour for high burnout risk
+
 #Represents a single check-in, holding the data and ratings.
 class Check_In:
-    def __init__(self, date, mood, energy, workload):
+    def __init__(self, username, date, mood, energy, workload):
+        self.username = username #Username of the user who made the check-in
         self.date = date #Date of the check-in
         self.mood = mood #Mood rating (1-5)
-        self.energy = energy #Energy rating (1-5)
-        self.workload = workload #Workload rating (1-5)
+        self.energy = energy
+        self.workload = workload
 
+    #Method to format the check-in data as a string for saving to the file
     def daily_check_in(self):
-        return f"{self.date},{self.mood},{self.energy},{self.workload}" #Formats the check-in data as a string for saving to the file.
+        return f"{self.username},{self.date},{self.mood},{self.energy},{self.workload}"
 
-#Reads the check-ins from the file and returns a list of Check_In objects. If the file does not exist, it returns an empty list.
-def load_check_ins(filename=FILENAME):
+#Functions for loading and saving user data and check-ins to files
+def load_users(filename=USERS_FILENAME):
+    users = {}
     try:
-        check_ins = [] #List to hold the check-ins
-        with open(filename, "r") as file: #Open the file for reading
+        with open(filename, "r") as file:
             for line in file:
-                date, mood, energy, workload = line.split(",") #Split the line into its components
-                check_ins.append(Check_In(date, int(mood), int(energy), int(workload))) #Create a Check_In object and add it to the list
-        return check_ins #Give back the list of check-ins
+                username, password = line.strip().split(",") #Load each username and password from the file and store them in a dictionary
+                users[username] = password
     except FileNotFoundError:
-        return check_ins #If the file does not exist, return an empty list
+        pass
+    return users
 
-#Saves a new check-in to the file by appending it to the end of the file.    
-def save_checkin(check_in, filename=FILENAME):
-    with open(filename, "a") as file: #Open the file for appending
-            file.write(check_in.daily_check_in() + "\n") #Write the check-in data to the file, followed by a newline character
+#Function to save a new user to the users file
+def save_user(username, password, filename=USERS_FILENAME):
+    with open(filename, "a") as file:
+        file.write(f"{username},{password}\n")
+
+#Function to load all check-ins from the check-in save file
+def load_check_ins(filename=FILENAME):
+    check_ins = []
+    try:
+        with open(filename, "r") as file:
+            for line in file:
+                username, date, mood, energy, workload = line.strip().split(",")
+                check_ins.append(Check_In(username, date, int(mood), int(energy), int(workload))) #Load each check-in from the file and create a Check_In object, adding it to the list of check-ins
+    except FileNotFoundError:
+        pass
+    return check_ins
+
+#Function to save all check-ins to the check-in save file
+def save_all_checkins(all_checkins, filename=FILENAME):
+    with open(filename, "w") as file:
+        for check_in in all_checkins:
+            file.write(check_in.daily_check_in() + "\n")
+
+#Function to ensure that the burnout risk score is between 0 and 100
+def limit_score(score):
+    if score < MIN_SCORE:
+        return MIN_SCORE
+    elif score > MAX_SCORE:
+        return MAX_SCORE
+    return score
 
 #Calculates the average burnout risk score based on the last 7 days of check-ins. If there are no check-ins, it returns a score of 0.
 def calculate_risk_score(check_ins):
@@ -50,123 +91,251 @@ def calculate_risk_score(check_ins):
     for check_in in recent:
         total += (UPPER_BOUNDARY - check_in.mood) + (UPPER_BOUNDARY - check_in.energy) + check_in.workload #Calculate the total score based on mood, energy, and workload ratings
     average = total / len(recent)
-    score = int((average / MAX_TOTAL_SCORE) * 100) #Convert the average score to a percentage
-    if score < MIN_SCORE: #If the score is below the minimum, set it to the minimum
-        score = MIN_SCORE
-    elif score > MAX_SCORE: #If the score is above the maximum, set it to the maximum
-        score = MAX_SCORE
-    return score #Return the calculated burnout risk score
-
+    return limit_score(int((average / MAX_TOTAL_SCORE) * 100)) #Convert the average score to a percentage and limit it to between 0 and 100
+   
 #Turns the numeric risk score into a string of "Low", "Moderate", or "high"
 def risk_level_from_score(score):
     if score >= HIGH_RISK_SCORE: #If the score is above the high risk threshold, return "high"
         return "high"
     elif score >= MODERATE_RISK_SCORE: #If the score is above the moderate risk threshold, return "moderate"
         return "moderate"
-    else:
-        return "low"
+    return "low"
 
-#Works out the risk level for a single check-in for that day only
-def risk_level_for(check_in):
-    total = (UPPER_BOUNDARY - check_in.mood) + (UPPER_BOUNDARY - check_in.energy) + check_in.workload #Calculate the total score based on mood, energy, and workload ratings
-    score = int((total / MAX_TOTAL_SCORE) * 100)
-    if score < MIN_SCORE: #If the score is below the minimum, set it to the minimum
-        score = MIN_SCORE
-    elif score > MAX_SCORE: #If the score is above the maximum, set it to the maximum
-        score = MAX_SCORE
-    return risk_level_from_score(score)
+#Calculates the burnout risk score for a single check-in, based on the mood, energy, and workload ratings.
+def score_for(check_in):
+    total = (UPPER_BOUNDARY - check_in.mood) + (UPPER_BOUNDARY - check_in.energy) + check_in.workload
+    return limit_score(int((total / MAX_TOTAL_SCORE) * 100))
+
+#Returns the colour associated with a given burnout risk level, for use in the GUI.
+def score_colour(level):
+    if level == "high":
+        return HIGH_COLOUR
+    elif level == "moderate":
+        return MODERATE_COLOUR
+    return LOW_COLOUR
 
 #Checks that a value typed into an entry box is a whole number and between 1 and 5
 def get_valid_rating(entry, field_name):
-    value = entry.get() #Get the value from the entry box
     try:
-        value = int(value) #Convert the value to an integer
+        value = int(entry.get())
     except ValueError:
-        messagebox.showerror("Invalid input", f"{field_name} must be a whole number.") #Show an error message if the value is not a whole number
+        messagebox.showerror("Invalid input", f"{field_name} must be a whole number.")
         return None
     if value < LOWER_BOUNDARY or value > UPPER_BOUNDARY:
-        messagebox.showerror("Invalid input", f"{field_name} must be between {LOWER_BOUNDARY} and {UPPER_BOUNDARY}.") #Show an error message if the value is not between 1 and 5
+        messagebox.showerror("Invalid input", f"{field_name} must be between {LOWER_BOUNDARY} and {UPPER_BOUNDARY}.")
         return None
     return value
 
-check_ins = load_check_ins() #Load the check-ins from the file when the program starts
+#Creates a styled button with a primary colour background, white text, and bold font.
+def styled_button(parent, text, command, bg=PRIMARY, fg="white", active_bg=PRIMARY_DARK):
+    return tk.Button(parent, text=text, command=command, bg=bg, fg=fg, activebackground=active_bg,
+                      activeforeground=fg, relief="flat", font=("Arial", 10, "bold"), padx=10, pady=6, bd=0)
+#Creates a styled entry box with a white background, solid border, and custom text colour.
+def styled_entry(parent, width=18, show=None):
+    return tk.Entry(parent, width=width, show=show, bg="white", fg=TEXT_COLOR, relief="solid", bd=1,
+                     highlightthickness=1, highlightbackground="#DAD6F5", highlightcolor=PRIMARY)
 
-#Create the main window for the GUI and set its title and size
+#Creates a label and an entry box in a single row, with the label on the left and the entry on the right.
+def labeled_entry(parent, row, label_text, width=18, show=None, prefill=None):
+    tk.Label(parent, text=label_text, bg=BG_COLOR, fg=TEXT_COLOR).grid(row=row, column=0, sticky="e", padx=(20, 10), pady=6)
+    entry = styled_entry(parent, width=width, show=show)
+    if prefill is not None:
+        entry.insert(0, str(prefill))
+    entry.grid(row=row, column=1, sticky="w", padx=(0, 20), pady=6)
+    return entry
+
+all_checkins = load_check_ins()
+users = load_users()
+open_popups = [] #List to keep track of all open pop-up windows, so they can be closed when logging out.
+
 root = tk.Tk()
-root.title("Flare") #Title of the window
-root.geometry("300x320") #Size of the window
+root.title("Flare")
+root.geometry("340x480")
 
-tk.Label(root, text="Mood (1-5):").pack(pady=(15, 0)) #Label for the mood entry box
-mood_entry = tk.Entry(root, width=10) #Entry box for the mood rating
-mood_entry.pack()
+#Clear the main window of all widgets, used when switching between login and main screens.
+def clear_screen():
+    for widget in root.winfo_children():
+        widget.destroy()
+#Close all open pop-up windows, used when logging out to ensure no pop-ups remain open.
+def close_all_popups():
+    for popup in open_popups:
+        if popup.winfo_exists():
+            popup.destroy()
+    open_popups.clear()
 
-tk.Label(root, text="Energy (1-5):").pack(pady=(10, 0)) #Label for the energy entry box
-energy_entry = tk.Entry(root, width=10) #Entry box for the energy rating
-energy_entry.pack()
+#Builds the login screen with username and password entry fields, and buttons for logging in or signing up.
+def build_login_screen():
+    clear_screen()
+    root.configure(bg=BG_COLOR)
+    tk.Label(root, text="Flare", font=("Arial", 20, "bold"), bg=BG_COLOR, fg=PRIMARY).grid(row=0, column=0, columnspan=2, pady=(30, 20))
 
-tk.Label(root, text="Workload (1-5):").pack(pady=(10, 0)) #Label for the workload entry box
-workload_entry = tk.Entry(root, width=10) #Entry box for the workload rating
-workload_entry.pack()
+    username_entry = labeled_entry(root, 1, "Username:")
+    password_entry = labeled_entry(root, 2, "Password:", show="*")
 
-score_label = tk.Label(root, text="", font=("Arial", 12)) #Label to display the burnout risk score and level
-score_label.pack(pady=15)
+    #Functions for handling login and sign-up actions, validation and saving new users.
+    def on_login():
+        username, password = username_entry.get().strip(), password_entry.get().strip()
+        if username not in users or users[username] != password:
+            messagebox.showerror("Login failed", "Incorrect username or password.")
+            return
+        build_main_screen(username)
 
-#Function to refresh the score label with the current burnout risk score and level
-def refresh_score_label():
-    score = calculate_risk_score(check_ins) #Calculate the current burnout risk score based on the check-ins
-    level = risk_level_from_score(score) #Determine the risk level based on the score
-    score_label.config(text=f"Burnout risk: {score} - {level}") #Update the score label with the current burnout risk score and level
+    #Function for handling sign-up action, validation and saving new users.
+    def on_signup():
+        username, password = username_entry.get().strip(), password_entry.get().strip()
+        if username == "" or password == "":
+            messagebox.showerror("Invalid input", "Username and password cannot be empty.")
+            return
+        if username in users:
+            messagebox.showerror("Invalid input", "That username is already taken.")
+            return
+        users[username] = password
+        save_user(username, password)
+        messagebox.showinfo("Account created", "You can now log in.")
 
-#Function to collect the entries from the user, validate them, create a new check-in, save it, and refresh the score label
-def collect_entries():
-    mood = get_valid_rating(mood_entry, "Mood") #Get and validate the mood rating from the entry box
-    energy = get_valid_rating(energy_entry, "Energy") #Get and validate the energy rating from the entry box
-    workload = get_valid_rating(workload_entry, "Workload") #Get and validate the workload rating from the entry box
-    if mood is None or energy is None or workload is None:
-        return #Messagebox has already told the user what was wrong
-    today = datetime.date.today().isoformat() #Get today's date
-    new_check_in = Check_In(today, mood, energy, workload)
-    check_ins.append(new_check_in) #Add the new check-in to the list
-    save_checkin(new_check_in) #Save the new check-in to the file
-    refresh_score_label() #Refresh the score label to show the updated burnout risk score and level
-    messagebox.showinfo("Saved", "Your check-in has been saved.")
+    #Create and place the login and sign-up buttons on the login screen.
+    styled_button(root, "Login", on_login).grid(row=3, column=0, columnspan=2, pady=(20, 6))
+    styled_button(root, "Sign Up", on_signup, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=4, column=0, columnspan=2, pady=6)
+    root.grid_columnconfigure(0, weight=1)
+    root.grid_columnconfigure(1, weight=1)
 
-#Submit button that calls collect_entries when clicked
-tk.Button(root, text="Submit check-in", command=collect_entries).pack(pady=5)
+#Builds the main screen after a successful login, allowing the user to submit check-ins, view history, and see their burnout risk score.
+def build_main_screen(username):
+    clear_screen()
+    root.configure(bg=BG_COLOR)
+    tk.Label(root, text=f"Logged in as: {username}", font=("Arial", 8), bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=0, column=0, columnspan=2, pady=(15, 10))
 
-#Function to open a new window that displays the history of check-ins
-def open_history():
-    history_window = tk.Toplevel(root) #Create a new window for the history of check-ins
-    history_window.title("Flare Check-in History") #Set the title of the history window
-    history_window.geometry("250x250") #Set the size of the history window
+    mood_entry = labeled_entry(root, 1, "Mood (1-5):", width=10)
+    energy_entry = labeled_entry(root, 2, "Energy (1-5):", width=10)
+    workload_entry = labeled_entry(root, 3, "Workload (1-5):", width=10)
+    tk.Label(root, text="1 = light, 5 = heavy (several deadlines)", font=("Arial", 8), bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=4, column=0, columnspan=2, pady=(0, 10))
 
-    tk.Label(history_window, text="Check-in History", font=("Arial", 14)).pack(pady=10) #Label for the history window
+    score_label = tk.Label(root, text="", font=("Arial", 14, "bold"), bg=BG_COLOR)
+    score_label.grid(row=5, column=0, columnspan=2, pady=10)
 
-    if not check_ins:
-        tk.Label(history_window, text="No check-ins yet.").pack(pady=10) #If there are no check-ins, show a message
-    else:
-        for check_in in check_ins:
-            text = f"{check_in.date}: {risk_level_for(check_in)}" #Format the check-in data for display
-            tk.Label(history_window, text=text, anchor="w").pack(fill="x", padx=20) #Display each check-in in the history window
+    #Returns a list of all check-ins for the currently logged-in user, used to calculate their burnout risk score and display their history.
+    def user_checkins():
+        result = []
+        for c in all_checkins:
+            if c.username == username:
+                result.append(c)
+        return result
 
-#Function to open a new window that displays a notice based on the current burnout risk score
-def open_notice():
-    notice_window = tk.Toplevel() #Create a new window for the notice
-    notice_window.title("Flare - Notice") #Set the title of the notice window
-    notice_window.geometry("250x150") #Set the size of the notice window
-    score = calculate_risk_score(check_ins)
-    level = risk_level_from_score(score)
+    #Refreshes the burnout risk score label on the main screen, calculating the score based on the user's check-ins and updating the label text and colour accordingly.
+    def refresh_score_label():
+        score = calculate_risk_score(user_checkins())
+        level = risk_level_from_score(score)
+        score_label.config(text=f"Burnout risk: {score} - {level}", fg=score_colour(level))
 
-    if level == "high": #If the burnout risk level is high, show a message to the user
-        message = "Your check-ins show a high burnout risk. Consider taking a break."
-    else: #If the burnout risk level is moderate or low, show a message to the user
-        message = "Your burnout risk is not currently high. Keep checking in daily."
+    #Collects the user's check-in entries from the entry fields, validates them, creates a new Check_In object, saves it to the file, and refreshes the burnout risk score label.
+    def collect_entries():
+        mood = get_valid_rating(mood_entry, "Mood")
+        energy = get_valid_rating(energy_entry, "Energy")
+        workload = get_valid_rating(workload_entry, "Workload")
+        if mood is None or energy is None or workload is None:
+            return
+        new_check_in = Check_In(username, datetime.date.today().isoformat(), mood, energy, workload)
+        all_checkins.append(new_check_in)
+        save_all_checkins(all_checkins)
+        refresh_score_label()
+        messagebox.showinfo("Saved", "Your check-in has been saved.")
+
+    #Create and place the submit button for the check-in entries on the main screen.
+    styled_button(root, "Submit check-in", collect_entries).grid(row=6, column=0, columnspan=2, pady=(5, 12))
+
+    #Functions for opening the history and notice pop-up windows, allowing the user to view their check-in history and receive a notice about their burnout risk level.
+    def open_history():
+        history_window = tk.Toplevel(root)
+        open_popups.append(history_window)
+        history_window.title("Flare Check-in History")
+        history_window.geometry("320x340")
+        history_window.configure(bg=BG_COLOR)
+        tk.Label(history_window, text="Check-in History", font=("Arial", 14, "bold"), bg=BG_COLOR, fg=TEXT_COLOR).grid(row=0, column=0, columnspan=3, pady=10)
+
+        rows_frame = tk.Frame(history_window, bg=BG_COLOR)
+        rows_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=10)
+
+        #Builds the rows of check-in history in the history pop-up window, displaying the date, score, risk level, and buttons for editing or deleting each check-in
+        def build_rows():
+            for widget in rows_frame.winfo_children():
+                widget.destroy()
+            entries = user_checkins()
+            if not entries:
+                tk.Label(rows_frame, text="No check-ins yet.", bg=BG_COLOR, fg=SUBTEXT_COLOR).grid(row=0, column=0, columnspan=3, pady=10)
+                return
+            for row_index, check_in in enumerate(entries):
+                score = score_for(check_in)
+                level = risk_level_from_score(score)
+                tk.Label(rows_frame, text=f"{check_in.date}: {score} - {level}", anchor="w", bg=BG_COLOR,
+                         fg=score_colour(level), font=("Arial", 9, "bold")).grid(row=row_index, column=0, sticky="w", pady=3)
+                tk.Button(rows_frame, text="Edit", command=lambda check_in=check_in: open_edit(check_in), bg=PRIMARY,
+                          fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=1, padx=4)
+                tk.Button(rows_frame, text="Delete", command=lambda check_in=check_in: delete_checkin(check_in),
+                          bg=DANGER, fg="white", relief="flat", font=("Arial", 8), padx=6).grid(row=row_index, column=2, padx=4)
+
+        #Functions for deleting and editing check-ins, allowing the user to manage their check-in history from the history pop-up window.
+        def delete_checkin(check_in):
+            all_checkins.remove(check_in)
+            save_all_checkins(all_checkins)
+            refresh_score_label()
+            build_rows()
+
+        #Function for opening the edit pop-up window, allowing the user to modify the mood, energy, and workload ratings of a specific check-in.
+        def open_edit(check_in):
+            edit_window = tk.Toplevel(history_window)
+            edit_window.title("Edit check-in")
+            edit_window.geometry("240x260")
+            edit_window.configure(bg=BG_COLOR)
+            edit_mood = labeled_entry(edit_window, 0, "Mood (1-5):", width=10, prefill=check_in.mood)
+            edit_energy = labeled_entry(edit_window, 1, "Energy (1-5):", width=10, prefill=check_in.energy)
+            edit_workload = labeled_entry(edit_window, 2, "Workload (1-5):", width=10, prefill=check_in.workload)
+
+            #Function for saving the edited check-in, validating the new ratings, updating the Check_In object, saving all check-ins to the file, and refreshing the burnout risk score label.
+            def save_edit():
+                mood = get_valid_rating(edit_mood, "Mood")
+                energy = get_valid_rating(edit_energy, "Energy")
+                workload = get_valid_rating(edit_workload, "Workload")
+                if mood is None or energy is None or workload is None:
+                    return
+                check_in.mood, check_in.energy, check_in.workload = mood, energy, workload
+                save_all_checkins(all_checkins)
+                refresh_score_label()
+                build_rows()
+                edit_window.destroy()
+
+            #Create and place the save button for the edited check-in on the edit pop-up window.
+            styled_button(edit_window, "Save", save_edit).grid(row=3, column=0, columnspan=2, pady=15)
+
+        build_rows() #Build the initial rows of check-in history when the history pop-up window is opened.
+
+    #Function for opening the notice pop-up window, displaying a message about the user's burnout risk level based on their check-ins.
+    def open_notice():
+        notice_window = tk.Toplevel(root)
+        open_popups.append(notice_window)
+        notice_window.title("Flare - Notice")
+        notice_window.geometry("260x160")
+        notice_window.configure(bg=BG_COLOR)
+        level = risk_level_from_score(calculate_risk_score(user_checkins()))
+        if level == "high":
+            message = "Your check-ins show a high burnout risk. Consider taking a break."
+        else:
+            message = "Your burnout risk is not currently high. Keep checking in daily."
+        tk.Label(notice_window, text=message, wraplength=210, justify="center", bg=BG_COLOR, fg=TEXT_COLOR).grid(row=0, column=0, padx=15, pady=25)
+
+    #Create and place the buttons for viewing history and viewing notice on the main screen.
+    styled_button(root, "View History", open_history, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=7, column=0, columnspan=2, pady=5)
+    styled_button(root, "View Notice", open_notice, bg=CARD_BG, fg=PRIMARY, active_bg="#E4EAF2").grid(row=8, column=0, columnspan=2, pady=5)
+
+    #Function for logging out, closing all pop-up windows, and returning to the login screen.
+    def logout():
+        close_all_popups()
+        build_login_screen()
+
+    #Create and place the logout button on the main screen, allowing the user to log out and return to the login screen.
+    styled_button(root, "Logout", logout, bg=DANGER, active_bg=DANGER_DARK).grid(row=9, column=0, columnspan=2, pady=(15, 20))
+    root.grid_columnconfigure(0, weight=1)
+    root.grid_columnconfigure(1, weight=1)
+    refresh_score_label() #Refresh the burnout risk score when the main screen launches.
     
-    tk.Label(notice_window, text=message, wraplength=200, justify="center").pack(pady=20, padx=10) #Display the notice message in the notice window
-
-tk.Button(root, text="View History", command=open_history).pack(pady=5) #Button that opens the history window when clicked
-tk.Button(root, text="View Notice", command=open_notice).pack(pady=5) #Button that opens the notice window when clicked
-
-refresh_score_label() #Refresh the score label when the program starts to show the current burnout risk score and level
-
-root.mainloop() #Start the Tkinter to run the GUI
+build_login_screen() #Start the app by building the login screen when the program is run.
+root.mainloop() #Start the Tkinter loop.
