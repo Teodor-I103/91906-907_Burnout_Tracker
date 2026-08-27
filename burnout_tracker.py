@@ -40,6 +40,7 @@ class Check_In:
     def daily_check_in(self):
         return f"{self.username},{self.date},{self.mood},{self.energy},{self.workload}"
 
+#Function to load the encryption key from a file, or create a new one if it doesn't exist.
 def load_or_create_key(filename=KEY_FILENAME):
     try:
         with open(filename, "rb") as file:
@@ -50,8 +51,7 @@ def load_or_create_key(filename=KEY_FILENAME):
             file.write(key)
         return key
 
-
-fernet = Fernet(load_or_create_key())
+fernet = Fernet(load_or_create_key()) #Create a Fernet object for encrypting and decrypting passwords using the loaded or newly created key.
 
 #Functions for loading and saving user data and check-ins to files
 def load_users(filename=USERS_FILENAME):
@@ -68,7 +68,7 @@ def load_users(filename=USERS_FILENAME):
 #Function to save a new user to the users file
 def save_user(username, encrypted_password, filename=USERS_FILENAME):
     with open(filename, "a") as file:
-        file.write(f"{username},{encrypted_password}\n")
+        file.write(f"{username},{encrypted_password}\n") #Append the new user's username and encrypted password to the users file
 
 #Function to load all check-ins from the check-in save file
 def load_check_ins(filename=FILENAME):
@@ -86,7 +86,7 @@ def load_check_ins(filename=FILENAME):
 def save_all_checkins(all_checkins, filename=FILENAME):
     with open(filename, "w") as file:
         for check_in in all_checkins:
-            file.write(check_in.daily_check_in() + "\n")
+            file.write(check_in.daily_check_in() + "\n") #Write each check-in's data to the file, one per line, using the daily_check_in method to format it correctly.
 
 #Function to ensure that the burnout risk score is between 0 and 100
 def limit_score(score):
@@ -144,6 +144,7 @@ def get_valid_rating(entry, field_name):
 def styled_button(parent, text, command, bg=PRIMARY, fg="white", active_bg=PRIMARY_DARK):
     return tk.Button(parent, text=text, command=command, bg=bg, fg=fg, activebackground=active_bg,
                       activeforeground=fg, relief="flat", font=("Arial", 10, "bold"), padx=10, pady=6, bd=0)
+
 #Creates a styled entry box with a white background, solid border, and custom text colour.
 def styled_entry(parent, width=18, show=None):
     return tk.Entry(parent, width=width, show=show, bg="white", fg=TEXT_COLOR, relief="solid", bd=1,
@@ -153,7 +154,7 @@ def styled_entry(parent, width=18, show=None):
 def labeled_entry(parent, row, label_text, width=18, show=None, prefill=None):
     tk.Label(parent, text=label_text, bg=BG_COLOR, fg=TEXT_COLOR).grid(row=row, column=0, sticky="e", padx=(20, 10), pady=6)
     entry = styled_entry(parent, width=width, show=show)
-    if prefill is not None:
+    if prefill is not None: #If a prefill value is provided, insert it into the entry box when creating it.
         entry.insert(0, str(prefill))
     entry.grid(row=row, column=1, sticky="w", padx=(0, 20), pady=6)
     return entry
@@ -174,12 +175,13 @@ root.geometry("340x580")
 def clear_screen():
     for widget in root.winfo_children():
         widget.destroy()
+
 #Close all open pop-up windows, used when logging out to ensure no pop-ups remain open.
 def close_all_popups():
     for popup in open_popups:
         if popup.winfo_exists():
             popup.destroy()
-    open_popups.clear()
+    open_popups.clear() #Clear the list of open pop-ups after closing them all.
 
 #Builds the login screen with username and password entry fields, and buttons for logging in or signing up.
 def build_login_screen():
@@ -196,7 +198,7 @@ def build_login_screen():
         if username not in users:
             messagebox.showerror("Login failed", "Incorrect username or password.")
             return
-        decrypted_password = fernet.decrypt(users[username].encode()).decode()
+        decrypted_password = fernet.decrypt(users[username].encode()).decode() #Decrypt the stored password for the given username using the Fernet object and compares it to the entered password.
         if decrypted_password != password:
             messagebox.showerror("Login failed", "Incorrect username or password.")
             return
@@ -212,6 +214,7 @@ def build_login_screen():
         su_username_entry = labeled_entry(signup_window, 0, "Username:")
         su_password_entry = labeled_entry(signup_window, 1, "Password:", show="*")
 
+        #Function for creating a new account, validating the input, encrypting the password, saving the new user, and closing the sign-up window.
         def on_create_account():
             username, password = su_username_entry.get().strip(), su_password_entry.get().strip()
             if username == "" or password == "":
@@ -222,9 +225,9 @@ def build_login_screen():
                 return
             encrypted_password = fernet.encrypt(password.encode()).decode()
             users[username] = encrypted_password
-            save_user(username, encrypted_password)
+            save_user(username, encrypted_password) #Save the new user's username and encrypted password to the users file
             messagebox.showinfo("Account created", f"Account '{username}' created. You can now log in.")
-            signup_window.destroy()
+            signup_window.destroy() #Close the sign-up window after successfully creating the account.
 
         styled_button(signup_window, "Create Account", on_create_account).grid(row=2, column=0, columnspan=2, pady=15)
 
@@ -263,7 +266,7 @@ def build_main_screen(username):
         result = []
         for c in all_checkins:
             if c.username == username:
-                result.append(c)
+                result.append(c) #Append the check-in to the result list if it belongs to the currently logged in user
         return result
 
     #Refreshes the burnout risk score label on the main screen, calculating the score based on the user's check-ins and updating the label text and colour accordingly.
@@ -274,7 +277,7 @@ def build_main_screen(username):
         week_level = risk_level_from_score(week_score)
         score_label.config(text=f"Burnout risk (7-day): {week_score} - {week_level}", fg=score_colour(week_level))
 
-        today_score = score_for(entries[-1]) if entries else 0
+        today_score = score_for(entries[-1]) if entries else 0 #If there are check-ins, get the score for the most recent one.
         today_level = risk_level_from_score(today_score)
         month_score = calculate_average_score(entries, MONTH)
         month_level = risk_level_from_score(month_score)
@@ -312,6 +315,7 @@ def build_main_screen(username):
         rows_frame = tk.Frame(history_window, bg=BG_COLOR)
         rows_frame.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=10)
 
+        #Function for building the rows of check-in history in the history pop-up window, displaying each check-in's date, score, risk level, and ratings.
         def build_rows():
             for widget in rows_frame.winfo_children():
                 widget.destroy()
