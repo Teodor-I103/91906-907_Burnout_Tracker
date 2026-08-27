@@ -322,7 +322,7 @@ def build_main_screen(username):
             for row_index, check_in in enumerate(entries):
                 score = score_for(check_in)
                 level = risk_level_from_score(score)
-                text = f"{check_in.date}: {score}-{level}  (M{check_in.energy} E{check_in.mood} W{check_in.workload})"
+                text = f"{check_in.date}: {score}-{level}  (M{check_in.mood} E{check_in.energy} W{check_in.workload})"
 
                 tk.Label(rows_frame, text=text, anchor="w", bg=BG_COLOR, fg=score_colour(level),
                          font=("Arial", 8, "bold")).grid(row=row_index, column=0, sticky="w", pady=3)
