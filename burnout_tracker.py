@@ -274,9 +274,9 @@ def build_main_screen(username):
         week_level = risk_level_from_score(week_score)
         score_label.config(text=f"Burnout risk (7-day): {week_score} - {week_level}", fg=score_colour(week_level))
 
-        today_score = score_for(entries[0]) if entries else 0
+        today_score = score_for(entries[-1]) if entries else 0
         today_level = risk_level_from_score(today_score)
-        month_score = calculate_average_score(entries, WEEK)
+        month_score = calculate_average_score(entries, MONTH)
         month_level = risk_level_from_score(month_score)
         stats_label.config(
             text=f"Today: {today_score} - {today_level}\n"
