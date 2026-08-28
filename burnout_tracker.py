@@ -1,6 +1,11 @@
 import tkinter as tk #Import Tkinter for the GUI
 from tkinter import messagebox #Import messagebox for pop-up validation and information messages
 import datetime #datetime module to get the current date for check-ins
+"""
+Note for marker:
+You must have the cryptography library installed to run my application.
+Check README.md for instructions on how to install it.
+"""
 from cryptography.fernet import Fernet #Import Fernet for password encryption and decryption
 
 #Named Constants used throughout the app
